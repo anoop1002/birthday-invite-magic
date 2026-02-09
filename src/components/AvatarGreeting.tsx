@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 
@@ -12,49 +12,77 @@ const AvatarGreeting = ({ guestName, onComplete }: AvatarGreetingProps) => {
   const [displayText, setDisplayText] = useState('');
   const [muted, setMuted] = useState(false);
 
-  const greetingMessage = `Hey ${guestName}! It's my birthday and I'd love for you to be there. Join me to celebrate with some fun, food, and good vibes! Hope you can make it!`;
+  const hasSpokenRef = useRef(false);
 
+  const formattedName =
+    guestName.charAt(0).toUpperCase() + guestName.slice(1).toLowerCase();
+
+  const greetingMessage = `Hey ${formattedName}! It’s my birthday, and I’m really happy you’re here. I’d love for you to join me in celebrating this special day with lots of fun!`;
+
+  /* ---------------- TEXT TYPING EFFECT (VISUAL ONLY) ---------------- */
   useEffect(() => {
-    // Text animation
     let index = 0;
+
     const textInterval = setInterval(() => {
       if (index <= greetingMessage.length) {
         setDisplayText(greetingMessage.slice(0, index));
         index++;
       } else {
         clearInterval(textInterval);
-        setTimeout(onComplete, 2000);
       }
     }, 40);
 
-    // Speech synthesis
-    if ('speechSynthesis' in window && !muted) {
-      const utterance = new SpeechSynthesisUtterance(greetingMessage);
-      utterance.rate = 0.75;
-      utterance.pitch = 1;
-      
+    return () => clearInterval(textInterval);
+  }, [greetingMessage]);
+
+  /* ---------------- SPEECH SYNTHESIS (CONTROLS FLOW) ---------------- */
+  useEffect(() => {
+    if (!('speechSynthesis' in window)) return;
+    if (muted) return;
+    if (hasSpokenRef.current) return;
+
+    hasSpokenRef.current = true;
+    speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(greetingMessage);
+    utterance.rate = 0.65; // slow & cinematic
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    const speak = () => {
       const voices = speechSynthesis.getVoices();
-      const preferredVoice = voices.find(v => 
-        v.name.includes('Google') || v.name.includes('Premium') || v.lang === 'en-US'
+      const preferredVoice = voices.find(
+        v =>
+          v.name.toLowerCase().includes('google') ||
+          v.name.toLowerCase().includes('premium') ||
+          v.lang === 'en-US'
       );
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
-      }
+
+      if (preferredVoice) utterance.voice = preferredVoice;
 
       utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
 
-      setTimeout(() => {
-        speechSynthesis.speak(utterance);
-      }, 500);
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        setTimeout(onComplete, 800); // ✅ card opens ONLY after full voice
+      };
+
+      speechSynthesis.speak(utterance);
+    };
+
+    if (speechSynthesis.getVoices().length === 0) {
+      speechSynthesis.onvoiceschanged = speak;
+    } else {
+      setTimeout(speak, 600);
     }
 
     return () => {
-      clearInterval(textInterval);
+      speechSynthesis.onvoiceschanged = null;
       speechSynthesis.cancel();
     };
-  }, [guestName, muted, onComplete]);
+  }, [greetingMessage, muted, onComplete]);
 
+  /* ---------------- UI ---------------- */
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -129,7 +157,9 @@ const AvatarGreeting = ({ guestName, onComplete }: AvatarGreetingProps) => {
         className="mt-8 px-4 py-2 bg-secondary rounded-full flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
       >
         {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-        <span className="text-sm font-body">{muted ? 'Unmute' : 'Mute'}</span>
+        <span className="text-sm font-body">
+          {muted ? 'Unmute' : 'Mute'}
+        </span>
       </motion.button>
     </motion.div>
   );

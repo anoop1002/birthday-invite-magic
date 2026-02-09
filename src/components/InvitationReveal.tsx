@@ -156,7 +156,7 @@ const InvitationReveal = ({ guestName, onBack }: InvitationRevealProps) => {
             <h1 className="font-display text-4xl md:text-5xl text-foreground mb-2">
               Anoop Sharma
             </h1>
-            <p className="text-gold font-body text-lg">turns fabulous!</p>
+            <p className="text-gold font-body text-lg">feeling fabulous ✨</p>
           </div>
 
           {/* Divider */}
