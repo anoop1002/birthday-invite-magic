@@ -20,6 +20,11 @@ const Index = () => {
     setCurrentScreen('invitation');
   };
 
+  const handleBackToEntry = () => {
+    setCurrentScreen('entry');
+    setGuestName('');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-dark overflow-hidden relative">
       <ParticleBackground />
@@ -44,7 +49,7 @@ const Index = () => {
           />
         )}
         {currentScreen === 'invitation' && (
-          <InvitationReveal key="invitation" guestName={guestName} />
+          <InvitationReveal key="invitation" guestName={guestName} onBack={handleBackToEntry} />
         )}
       </AnimatePresence>
     </div>
