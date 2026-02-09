@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { MapPin, Clock, Calendar, PartyPopper, Sparkles, Gift } from 'lucide-react';
+import { MapPin, Clock, Calendar, PartyPopper, Sparkles, Gift, ArrowLeft } from 'lucide-react';
 
 interface InvitationRevealProps {
   guestName: string;
+  onBack: () => void;
 }
 
-const InvitationReveal = ({ guestName }: InvitationRevealProps) => {
+const InvitationReveal = ({ guestName, onBack }: InvitationRevealProps) => {
   useEffect(() => {
     // Initial burst
     const burst = () => {
@@ -104,6 +105,15 @@ const InvitationReveal = ({ guestName }: InvitationRevealProps) => {
       animate="visible"
       className="flex flex-col items-center justify-center min-h-screen px-6 py-12 relative z-10"
     >
+      {/* Back Button */}
+      <motion.button
+        variants={itemVariants}
+        onClick={onBack}
+        className="absolute top-6 left-6 p-3 bg-card/80 backdrop-blur-sm rounded-full border border-gold/20 text-muted-foreground hover:text-gold hover:border-gold/50 transition-all duration-300"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </motion.button>
+
       {/* Header */}
       <motion.div variants={itemVariants} className="text-center mb-8">
         <div className="flex items-center justify-center gap-3 mb-4">

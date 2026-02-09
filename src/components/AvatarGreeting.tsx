@@ -12,7 +12,7 @@ const AvatarGreeting = ({ guestName, onComplete }: AvatarGreetingProps) => {
   const [displayText, setDisplayText] = useState('');
   const [muted, setMuted] = useState(false);
 
-  const greetingMessage = `Hey ${guestName}! You're cordially invited to Anoop Sharma's Birthday Bash! Get ready for an unforgettable night of celebration, music, and memories. We can't wait to see you there!`;
+  const greetingMessage = `Hey ${guestName}! It's my birthday and I'd love for you to be there. Join me to celebrate with some fun, food, and good vibes! Hope you can make it!`;
 
   useEffect(() => {
     // Text animation
@@ -30,7 +30,7 @@ const AvatarGreeting = ({ guestName, onComplete }: AvatarGreetingProps) => {
     // Speech synthesis
     if ('speechSynthesis' in window && !muted) {
       const utterance = new SpeechSynthesisUtterance(greetingMessage);
-      utterance.rate = 0.9;
+      utterance.rate = 0.75;
       utterance.pitch = 1;
       
       const voices = speechSynthesis.getVoices();
