@@ -3,39 +3,48 @@ import { motion } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 
 interface AvatarGreetingProps {
-  guestName: string;
+  guestNames: string[];
   onComplete: () => void;
 }
 
-const AvatarGreeting = ({ guestName, onComplete }: AvatarGreetingProps) => {
+const formatName = (name: string) =>
+  name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+
+const AvatarGreeting = ({ guestNames, onComplete }: AvatarGreetingProps) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [displayText, setDisplayText] = useState('');
   const [muted, setMuted] = useState(false);
 
   const hasSpokenRef = useRef(false);
 
-  const formattedName =
-    guestName.charAt(0).toUpperCase() + guestName.slice(1).toLowerCase();
+  // ✅ Safely format names
+  const formattedNames =
+    guestNames.length > 0
+      ? guestNames.map(formatName).join(' & ')
+      : 'Guest';
 
-  const greetingMessage = `Hey ${formattedName}! It’s my birthday, and I’m really happy you’re here. I’d love for you to join me in celebrating this special day with lots of fun!`;
+  const greetingMessage = `Hey ${formattedNames}! 
+  It’s my birthday, and I’m really happy you’re here. I’d love for you to join me in celebrating this special day with lots of fun!`;
 
-  /* ---------------- TEXT TYPING EFFECT (VISUAL ONLY) ---------------- */
-  useEffect(() => {
-    let index = 0;
+  /* ---------------- TEXT TYPING EFFECT ---------------- */
+ useEffect(() => {
+  let index = 0;
 
-    const textInterval = setInterval(() => {
-      if (index <= greetingMessage.length) {
-        setDisplayText(greetingMessage.slice(0, index));
-        index++;
-      } else {
-        clearInterval(textInterval);
-      }
-    }, 40);
+  const textInterval = setInterval(() => {
+    if (index <= greetingMessage.length) {
+      setDisplayText(greetingMessage.slice(0, index));
+      index++;
+    } else {
+      clearInterval(textInterval);
+      setTimeout(onComplete, 500); 
+    }
+  }, 40);
 
-    return () => clearInterval(textInterval);
-  }, [greetingMessage]);
+  return () => clearInterval(textInterval);
+}, [greetingMessage, onComplete]);
 
-  /* ---------------- SPEECH SYNTHESIS (CONTROLS FLOW) ---------------- */
+
+  /* ---------------- SPEECH SYNTHESIS ---------------- */
   useEffect(() => {
     if (!('speechSynthesis' in window)) return;
     if (muted) return;
@@ -45,7 +54,7 @@ const AvatarGreeting = ({ guestName, onComplete }: AvatarGreetingProps) => {
     speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(greetingMessage);
-    utterance.rate = 0.65; // slow & cinematic
+    utterance.rate = 0.65;
     utterance.pitch = 1;
     utterance.volume = 1;
 
@@ -64,7 +73,7 @@ const AvatarGreeting = ({ guestName, onComplete }: AvatarGreetingProps) => {
 
       utterance.onend = () => {
         setIsSpeaking(false);
-        setTimeout(onComplete, 800); // ✅ card opens ONLY after full voice
+        setTimeout(onComplete, 800);
       };
 
       speechSynthesis.speak(utterance);
@@ -136,7 +145,7 @@ const AvatarGreeting = ({ guestName, onComplete }: AvatarGreetingProps) => {
         transition={{ delay: 0.3 }}
         className="max-w-lg text-center"
       >
-        <motion.p className="text-xl md:text-2xl font-body leading-relaxed text-champagne">
+       <motion.p className="text-xl md:text-2xl font-body leading-relaxed text-champagne whitespace-pre-line">
           {displayText}
           <motion.span
             animate={{ opacity: [0, 1] }}

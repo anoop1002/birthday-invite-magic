@@ -3,8 +3,23 @@ import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 
 interface NameEntryScreenProps {
-  onSubmit: (name: string) => void;
+  onSubmit: (names: string[]) => void;
 }
+
+/**
+ * Map any entered name to an invite pair
+ */
+const invitePairs: Record<string, string[]> = {
+  jay: ['Jay', 'Yash'],
+  khushi: ['Khushi', 'Nikki'],
+ 
+};
+
+/**
+ * Format name nicely (Jay, Khushi etc.)
+ */
+const formatName = (name: string) =>
+  name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 
 const NameEntryScreen = ({ onSubmit }: NameEntryScreenProps) => {
   const [name, setName] = useState('');
@@ -12,8 +27,17 @@ const NameEntryScreen = ({ onSubmit }: NameEntryScreenProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      onSubmit(name.trim());
+
+    const enteredName = name.trim().toLowerCase();
+    if (!enteredName) return;
+
+    const matchedPair = invitePairs[enteredName];
+
+    if (matchedPair) {
+      onSubmit(matchedPair);
+    } else {
+      // fallback → single name
+      onSubmit([formatName(name.trim())]);
     }
   };
 
@@ -33,6 +57,7 @@ const NameEntryScreen = ({ onSubmit }: NameEntryScreenProps) => {
       >
         <Sparkles size={40} />
       </motion.div>
+
       <motion.div
         initial={{ scale: 0, rotate: 180 }}
         animate={{ scale: 1, rotate: 0 }}
@@ -57,9 +82,11 @@ const NameEntryScreen = ({ onSubmit }: NameEntryScreenProps) => {
         >
           You're Invited
         </motion.p>
+
         <h1 className="font-display text-5xl md:text-7xl text-gradient-gold leading-tight">
-          Anoop's Birthday
+          Anoop&apos;s Birthday
         </h1>
+
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
@@ -68,6 +95,7 @@ const NameEntryScreen = ({ onSubmit }: NameEntryScreenProps) => {
         />
       </motion.div>
 
+      {/* Form */}
       <motion.form
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
